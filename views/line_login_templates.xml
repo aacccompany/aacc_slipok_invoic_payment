@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="line_phone_registration" name="LINE Phone Registration">
+        <t t-call="web.login_layout">
+            <div t-if="error" class="alert alert-danger" role="alert">
+                <t t-esc="error"/>
+            </div>
+            <div class="text-center mb-4">
+                <img t-if="line_data.get('image_url')" t-att-src="line_data.get('image_url')" class="rounded-circle mb-3 shadow" style="width: 100px; height: 100px; object-fit: cover;"/>
+                <h3 class="font-weight-bold">Welcome, <t t-esc="line_data.get('name')"/></h3>
+                <p class="text-muted">Please enter your phone number to complete the registration.</p>
+            </div>
+            
+            <form role="form" method="post" action="/line/register/phone">
+                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                <div class="mb-3">
+                    <label for="phone" class="form-label">Phone Number</label>
+                    <input type="tel" name="phone" id="phone" class="form-control form-control-lg" required="required" placeholder="e.g. 0812345678" pattern="[0-9]{9,10}"/>
+                </div>
+                <div class="d-grid mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg">Save and Login</button>
+                </div>
+            </form>
+        </t>
+    </template>
+
+    <template id="line_registration_success" name="LINE Registration Success">
+        <t t-call="web.login_layout">
+            <div class="text-center">
+                <div class="mb-4">
+                    <i class="fa fa-check-circle text-success" style="font-size: 5rem;"></i>
+                </div>
+                <h3 class="font-weight-bold">Registration Successful!</h3>
+                <p class="text-muted mt-2">Thank you for registering, <t t-esc="partner.name"/></p>
+                <div class="mt-4">
+                    <a href="/web" class="btn btn-primary">Go to System</a>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <template id="line_login_error_template" name="LINE Login Error">
+        <t t-call="web.login_layout">
+            <div class="text-center">
+                <div class="mb-4">
+                    <i class="fa fa-exclamation-triangle text-danger" style="font-size: 5rem;"></i>
+                </div>
+                <h3 class="font-weight-bold">An Error Occurred</h3>
+                <p class="text-danger mt-2"><t t-esc="error_msg"/></p>
+                <div class="mt-4">
+                    <a href="/line/login" class="btn btn-primary">Try Again</a>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

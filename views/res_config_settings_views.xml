@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_aacc_slipok_invoice" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.aacc.slipok.invoice</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="account.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <app string="SlipOK Invoice Payment" name="aacc_slipok_invoice_payment">
+                    <block title="LINE Configuration" name="aacc_slipok_invoice_line_setting">
+                        <setting string="LINE Login Channel ID" help="Channel ID for LINE Login API">
+                            <field name="aacc_line_login_channel_id"/>
+                        </setting>
+                        <setting string="LINE Login Channel Secret" help="Channel Secret for LINE Login API">
+                            <field name="aacc_line_login_channel_secret" password="True"/>
+                        </setting>
+                        <setting string="LINE Channel Secret" help="Channel Secret for LINE Messaging API (Bot)">
+                            <field name="aacc_slipok_invoice_line_channel_secret" password="True"/>
+                        </setting>
+                        <setting string="LINE Access Token" help="Long-lived Access Token for LINE OA">
+                            <field name="aacc_slipok_invoice_line_access_token" password="True"/>
+                        </setting>
+                        <setting string="Payment QR Code Image" help="Upload your payment QR Code to be sent to customers via LINE automatically.">
+                            <field name="aacc_line_qr_code" widget="image" class="w-100"/>
+                        </setting>
+                    </block>
+                    <block title="Slip Verification Configuration" name="aacc_slipok_invoice_setting">
+                        <setting string="Verification Provider" help="Choose which API to use for verifying slips">
+                            <field name="slip_verification_provider"/>
+                        </setting>
+                        <setting string="SlipOK Branch ID" help="Branch ID from SlipOK" invisible="slip_verification_provider != 'slipok'">
+                            <field name="aacc_slipok_invoice_branch_id"/>
+                        </setting>
+                        <setting string="SlipOK API Key" help="API Key from SlipOK" invisible="slip_verification_provider != 'slipok'">
+                            <field name="aacc_slipok_invoice_api_key" password="True"/>
+                        </setting>
+                        <setting string="Slip2Go API Secret" help="API Secret for Slip2Go API" invisible="slip_verification_provider != 'slip2go'">
+                            <field name="slip2go_api_secret" password="True"/>
+                        </setting>
+                        <setting string="Company Bank Account" help="Company destination bank account for slip verification">
+                            <field name="aacc_slipok_invoice_company_bank_account"/>
+                        </setting>
+                        <setting string="Default Payment Journal" help="Journal used for automatic payment registration">
+                            <field name="aacc_slipok_invoice_payment_journal_id" options="{'no_create': True}"/>
+                        </setting>
+                    </block>
+                </app>
+            </xpath>
+        </field>
+    </record>
+</odoo>
