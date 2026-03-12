@@ -1,13 +1,148 @@
 <!-- Main Header Section -->
-<section class="oe_container" style="background-color: #fffaf0; padding: 40px 0; font-family: 'Inter', sans-serif;">
+<style>
+    /* Global/Typography */
+    .aacc-container {
+        font-family: 'Inter', sans-serif;
+    }
+
+    /* Buttons */
+    .aacc-btn-primary {
+        background-color: #fca311;
+        color: white !important;
+        font-weight: 700;
+        border-radius: 50px;
+        padding: 12px 35px;
+        box-shadow: 0 4px 15px rgba(252, 163, 17, 0.4);
+        text-transform: uppercase;
+        font-size: 14px;
+        letter-spacing: 1px;
+        transition: all 0.3s ease;
+        border: 2px solid #fca311;
+    }
+
+    .aacc-btn-primary:hover {
+        background-color: transparent;
+        color: #fca311 !important;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(252, 163, 17, 0.6);
+        text-decoration: none;
+    }
+
+    /* Footer Section */
+    .aacc-footer {
+        background-color: #0b132b;
+        padding: 70px 0 40px 0;
+        color: white;
+        border-radius: 0 0 10px 10px;
+    }
+
+    .aacc-footer-title {
+        color: white;
+        font-weight: 800;
+        font-size: 32px;
+        margin-bottom: 20px;
+    }
+
+    .aacc-footer-subtitle {
+        font-size: 16px;
+        color: #e5e5e5;
+        margin-top: 0;
+        margin-bottom: 30px;
+        font-weight: 300;
+    }
+
+    /* Logo block */
+    .aacc-footer-logo-wrap {
+        background: white;
+        padding: 10px;
+        border-radius: 12px;
+        margin-right: 20px;
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+        transition: transform 0.3s ease;
+    }
+
+    .aacc-footer-logo-wrap:hover {
+        transform: rotate(-3deg) scale(1.08);
+    }
+
+    .aacc-footer-logo {
+        height: 70px;
+        width: 70px;
+        object-fit: contain;
+        border-radius: 8px;
+    }
+
+    .aacc-footer-company-name {
+        margin: 0;
+        font-weight: 900;
+        color: #fff;
+        font-size: 26px;
+        letter-spacing: 0.5px;
+    }
+
+    .aacc-footer-tagline {
+        color: #fca311;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+    }
+
+    /* Copyright */
+    .aacc-footer-creator {
+        margin: 0;
+        font-size: 14px;
+        color: #ccc;
+    }
+
+    .aacc-footer-heart {
+        color: #ff4d4f;
+        display: inline-block;
+        animation: heartbeat 1.5s infinite;
+    }
+
+    .aacc-footer-author {
+        color: #fff;
+        font-weight: 600;
+    }
+
+    .aacc-footer-copyright {
+        margin: 0;
+        font-size: 12px;
+        margin-top: 6px;
+        color: #888;
+    }
+
+    .aacc-footer-divider {
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        padding-top: 40px;
+        margin-top: 30px;
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    @keyframes heartbeat {
+
+        0%,
+        100% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.2);
+        }
+    }
+</style>
+<section class="oe_container aacc-container" style="background-color: #fffaf0; padding: 40px 0;">
     <div class="row align-items-center oe_spaced">
         <div class="col-12 col-md-6 order-md-2 text-center">
             <img src="banner.png" alt="App Banner"
                 style="max-width: 100%; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);" />
-            <p class="text-muted mt-2 small"><em>(Image Placeholder: 1500x750 banner)</em></p>
+            <p class="text-muted mt-2 small"><em></em></p>
         </div>
         <div class="col-12 col-md-6 order-md-1">
-            <h1 style="color: #333; font-weight: 800; font-size: 38px; line-height: 1.2;">LINE Payment & SlipOK
+            <h1 style="color: #333; font-weight: 800; font-size: 38px; line-height: 1.2;">LINE Payment & Slip
                 Auto-Verify Integration</h1>
             <p style="color: #666; font-size: 18px; line-height: 1.6; margin-top: 20px;">
                 Revolutionize your payment collection process with AI-verified bank transfers via LINE OA. Instantly
@@ -19,7 +154,7 @@
                     19 Ready</span>
                 <span class="badge bg-dark mt-2 mt-md-0"
                     style="padding: 10px 20px; font-size: 16px; border-radius: 50px; margin-left: 10px;">🇹🇭 Thai
-                    Paymentห Supportห</span>
+                    Payment Support</span>
             </div>
         </div>
     </div>
@@ -58,7 +193,8 @@
                 <i class="fa fa-robot" style="font-size: 32px; color: #fca311;"></i>
             </div>
             <h4 style="font-weight: 700; color: #333;">AI Slip Verification</h4>
-            <p style="color: #666;">Automatically verify customer bank slips via SlipOK API, detecting fraud and
+            <p style="color: #666;">Automatically verify customer bank slips via AI Verification API, detecting fraud
+                and
                 reconciling the payment in Odoo instantly.</p>
         </div>
     </div>
@@ -81,15 +217,16 @@
                 Step 1</div>
             <h3 style="font-weight: 700; color: #333;">Configuration & Setup</h3>
             <p style="color: #666; font-size: 16px; line-height: 1.6;">
-                Navigate to <strong>Settings &gt; SlipOK Invoice Payment</strong>. Enter your LINE Messaging API
-                credentials (Channel Secret & Access Token) and your SlipOK Branch details. You can also upload your
+                Navigate to <strong>Settings &gt; Invoice Slip Verification</strong>. Enter your LINE Messaging API
+                credentials (Channel Secret & Access Token) and your Verification Provider details. You can also upload
+                your
                 company's Payment QR Code here.
             </p>
         </div>
         <div class="col-12 col-md-6 text-center">
-            <img class="img-fluid" src="settings.png" alt="Settings Setup"
-                style="border: 2px solid #eee; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);" />
-            <p class="text-muted mt-2 small"><em>(Image Placeholder: Backend Settings Page)</em></p>
+            <img class="img-fluid" src="settings_menu.png" alt="Settings Setup"
+                style="border: 2px solid #eee; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); max-height: 250px;" />
+            <p class="text-muted mt-2 small"><em></em></p>
         </div>
     </div>
 
@@ -140,7 +277,8 @@
                 Step 4</div>
             <h3 style="font-weight: 700; color: #333;">AI Verification & Auto-Reconcile</h3>
             <p style="color: #666; font-size: 16px; line-height: 1.6;">
-                The Odoo Webhook catches the image and sends it to the SlipOK API. The AI verifies the exact amount,
+                The Odoo Webhook catches the image and sends it to the AI Verification API. The AI verifies the exact
+                amount,
                 checks for duplicate slips, and ensures the money went to your bank account. Upon success, Odoo
                 registers the payment, marks the invoice as <strong>PAID</strong>, and the LINE Bot replies with a
                 receipt confirmation.
@@ -156,16 +294,40 @@
 </section>
 
 <!-- Footer Section -->
-<section class="oe_container" style="background-color: #14213d; padding: 50px 0; color: white;">
-    <div class="row oe_spaced text-center">
-        <h2 style="color: white; font-weight: 700;">Ready to Transform Your Workflow?</h2>
-        <p style="font-size: 18px; color: #e5e5e5; margin-top: 15px; margin-bottom: 30px;">Let us handle the boring
-            accounting tasks while you focus on scaling your business.</p>
+<section class="oe_container aacc-container aacc-footer">
+    <div class="row oe_spaced text-center mb-5">
+        <h2 class="aacc-footer-title">Ready to Transform Your Workflow?</h2>
+        <p class="aacc-footer-subtitle">Let us handle the boring accounting tasks while you focus on scaling your
+            business.</p>
         <div>
-            <a href="mailto:support@yourcompany.com" class="btn btn-lg"
-                style="background-color: #fca311; color: white; font-weight: bold; border-radius: 5px; padding: 15px 30px;"><i
-                    class="fa fa-envelope"></i> Contact Us for Support</a>
+            <a href="mailto:support@yourcompany.com" class="btn btn-lg aacc-btn-primary">
+                <i class="fa fa-envelope" style="margin-right: 8px;"></i> Contact Us for Support
+            </a>
         </div>
-        <p style="color: #aaa; margin-top: 30px; font-size: 14px;">© 2026 Developed by AACC. All rights reserved.</p>
+    </div>
+
+    <div class="row oe_spaced aacc-footer-divider">
+        <!-- Company Info & Logo -->
+        <div
+            class="col-12 col-md-6 text-center text-md-left mb-4 mb-md-0 d-flex justify-content-center justify-content-md-start align-items-center">
+            <div class="aacc-footer-logo-wrap">
+                <img src="your_logo.png" alt="Company Logo" class="aacc-footer-logo" />
+            </div>
+            <div style="text-align: left;">
+                <p
+                    style="color: #ccc; font-size: 11px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 2px;">
+                    Powered By</p>
+                <h4 class="aacc-footer-company-name">AACC</h4>
+                <span class="aacc-footer-tagline">Technology & Innovation</span>
+            </div>
+        </div>
+
+        <!-- Creator & Copyright Info -->
+        <div
+            class="col-12 col-md-6 text-center text-md-right d-flex flex-column justify-content-center align-items-center align-items-md-end">
+            <p class="aacc-footer-creator">Crafted with <i class="fa fa-heart aacc-footer-heart"></i> by <strong
+                    class="aacc-footer-author">Alex</strong></p>
+            <p class="aacc-footer-copyright">© 2026 AACC. All rights reserved.</p>
+        </div>
     </div>
 </section>

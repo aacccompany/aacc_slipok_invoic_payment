@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 import requests
 from urllib.parse import urlencode
 
@@ -38,7 +39,8 @@ class LineLoginController(http.Controller):
         redirect_uri = base_url.rstrip('/') + '/line/login/callback'
         
         # In a real app, generate and verify state to prevent CSRF
-        state = 'line_login_state_aacc'
+        state = os.urandom(16).hex()
+        request.session['line_login_state'] = state
         
         params = {
             'response_type': 'code',
@@ -54,6 +56,13 @@ class LineLoginController(http.Controller):
     @http.route('/line/login/callback', type='http', auth='public', website=True)
     def line_login_callback(self, code=None, state=None, error=None, error_description=None, **kwargs):
         """ Handle redirect from LINE after user authorizes """
+        expected_state = request.session.pop('line_login_state', None)
+        if not state or state != expected_state:
+            _logger.warning("Invalid or missing state parameter in LINE login callback. Possible CSRF attack.")
+            return request.render('aacc_slipok_invoice_payment.line_login_error_template', {
+                'error_msg': _('Invalid session state. Please try logging in again.')
+            })
+
         if error:
             _logger.error(f"LINE Login Error: {error} - {error_description}")
             return request.render('aacc_slipok_invoice_payment.line_login_error_template', {

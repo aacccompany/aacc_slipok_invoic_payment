@@ -8,7 +8,6 @@ class ResCompany(models.Model):
     slip_verification_provider = fields.Selection(
         [('slipok', 'SlipOK'), ('slip2go', 'Slip2Go')],
         string="Slip Verification Provider",
-        default='slipok',
-        required=True
+        default='slipok'
     )
     slip2go_api_secret = fields.Char(string="Slip2Go API Secret")

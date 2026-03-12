@@ -6,7 +6,7 @@
         <field name="inherit_id" ref="account.res_config_settings_view_form"/>
         <field name="arch" type="xml">
             <xpath expr="//form" position="inside">
-                <app string="SlipOK Invoice Payment" name="aacc_slipok_invoice_payment">
+                <app string="Invoice Slip Verification" name="aacc_slipok_invoice_payment" logo="/aacc_slipok_invoice_payment/static/description/icon.png">
                     <block title="LINE Configuration" name="aacc_slipok_invoice_line_setting">
                         <setting string="LINE Login Channel ID" help="Channel ID for LINE Login API">
                             <field name="aacc_line_login_channel_id"/>
@@ -28,13 +28,13 @@
                         <setting string="Verification Provider" help="Choose which API to use for verifying slips">
                             <field name="slip_verification_provider"/>
                         </setting>
-                        <setting string="SlipOK Branch ID" help="Branch ID from SlipOK" invisible="slip_verification_provider != 'slipok'">
+                        <setting string="SlipOK Branch ID" help="Branch ID from SlipOK" invisible="slip_verification_provider == 'slip2go'">
                             <field name="aacc_slipok_invoice_branch_id"/>
                         </setting>
-                        <setting string="SlipOK API Key" help="API Key from SlipOK" invisible="slip_verification_provider != 'slipok'">
+                        <setting string="SlipOK API Key" help="API Key from SlipOK" invisible="slip_verification_provider == 'slip2go'">
                             <field name="aacc_slipok_invoice_api_key" password="True"/>
                         </setting>
-                        <setting string="Slip2Go API Secret" help="API Secret for Slip2Go API" invisible="slip_verification_provider != 'slip2go'">
+                        <setting string="Slip2Go API Secret" help="API Secret for Slip2Go API" invisible="slip_verification_provider == 'slipok'">
                             <field name="slip2go_api_secret" password="True"/>
                         </setting>
                         <setting string="Company Bank Account" help="Company destination bank account for slip verification">

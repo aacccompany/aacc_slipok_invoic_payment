@@ -15,25 +15,25 @@ _logger = logging.getLogger(__name__)
 class AccountMove(models.Model):
     _inherit = 'account.move'
 
-    slipok_image = fields.Binary(string="Slip Image", attachment=True, copy=False)
-    slipok_image_filename = fields.Char(string="Slip Filename", copy=False)
-    slipok_state = fields.Selection(
+    slip_image = fields.Binary(string="Slip Image", attachment=True, copy=False)
+    slip_image_filename = fields.Char(string="Slip Filename", copy=False)
+    slip_state = fields.Selection(
         [
             ('none', 'No Slip'),
             ('verified', 'Verified'),
             ('rejected', 'Rejected'),
         ],
-        string="SlipOK State",
+        string="Slip Verification State",
         default='none',
         copy=False,
         tracking=True,
     )
-    slipok_message = fields.Char(string="SlipOK Message", copy=False, readonly=True)
-    slipok_transaction_id = fields.Char(string="Slip Transaction ID", copy=False, readonly=True, index=True)
-    slipok_verified_amount = fields.Monetary(string="Slip Amount", currency_field='currency_id', copy=False, readonly=True)
-    slipok_receiver_account = fields.Char(string="Receiver Account", copy=False, readonly=True)
-    slipok_verified_at = fields.Datetime(string="Verified At", copy=False, readonly=True)
-    slipok_response = fields.Text(string="SlipOK Response", copy=False, readonly=True)
+    slip_message = fields.Char(string="Verification Message", copy=False, readonly=True)
+    slip_transaction_id = fields.Char(string="Slip Transaction ID", copy=False, readonly=True, index=True)
+    slip_verified_amount = fields.Monetary(string="Slip Amount", currency_field='currency_id', copy=False, readonly=True)
+    slip_receiver_account = fields.Char(string="Receiver Account", copy=False, readonly=True)
+    slip_verified_at = fields.Datetime(string="Verified At", copy=False, readonly=True)
+    slip_response = fields.Text(string="Verification Response", copy=False, readonly=True)
 
     line_user_id = fields.Char(related='partner_id.line_user_id', readonly=False, store=True, string="LINE User ID", copy=False)
     is_active_line_bill = fields.Boolean(string="Active LINE Bill", default=False, copy=False)
@@ -143,27 +143,27 @@ class AccountMove(models.Model):
             _logger.error("Failed to push LINE message: %s", exc)
             raise UserError(_("Failed to send LINE message. Please check configuration/logs.")) from exc
 
-    def action_slipok_verify_and_register_payment(self):
+    def action_verify_slip_and_register_payment(self):
         for move in self:
-            move._action_slipok_verify_and_register_payment()
+            move._action_verify_slip_and_register_payment()
         return True
 
-    def _action_slipok_verify_and_register_payment(self):
+    def _action_verify_slip_and_register_payment(self):
         self.ensure_one()
 
         if self.move_type != 'out_invoice':
-            raise UserError(_("SlipOK verification supports only Customer Invoices."))
+            raise UserError(_("Slip verification supports only Customer Invoices."))
         if self.state != 'posted':
             raise UserError(_("Please post the invoice before verifying slip."))
         if self.payment_state in ('in_payment', 'paid'):
             raise UserError(_("This invoice is already in payment flow or fully paid."))
-        if not self.slipok_image:
+        if not self.slip_image:
             raise UserError(_("Please upload slip image first."))
 
-        provider, branch_id, api_key, slip2go_secret, company_bank, journal = self._slipok_get_configuration()
+        provider, branch_id, api_key, slip2go_secret, company_bank, journal = self._slip_get_configuration()
 
         try:
-            image_bytes = base64.b64decode(self.slipok_image)
+            image_bytes = base64.b64decode(self.slip_image)
         except Exception as exc:
             _logger.error("Invalid base64 slip image for invoice %s: %s", self.name, exc)
             raise UserError(_("Uploaded slip image is invalid.")) from exc
@@ -179,7 +179,7 @@ class AccountMove(models.Model):
         else:
             result = verify_slip_api(branch_id, api_key, image_bytes)
 
-        self.slipok_response = result.get('raw_response') or '{}'
+        self.slip_response = result.get('raw_response') or '{}'
 
         if not result.get('success'):
             reason = result.get('error_msg') or _('Slip verification failed')
@@ -224,19 +224,19 @@ class AccountMove(models.Model):
         if expected_accounts and not receiver_digits:
             self.message_post(
                 body=_(
-                    "SlipOK did not return receiver account digits, so receiver account validation was skipped."
+                    "Verification API did not return receiver account digits, so receiver account validation was skipped."
                 )
             )
 
         transaction_id = result.get('transaction_id')
         if not transaction_id:
-            reason = _("SlipOK did not return transaction ID.")
+            reason = _("Verification API did not return transaction ID.")
             self._mark_slip_rejected(reason)
             raise UserError(reason)
 
         duplicate_invoice = self.search([
             ('id', '!=', self.id),
-            ('slipok_transaction_id', '=', transaction_id),
+            ('slip_transaction_id', '=', transaction_id),
         ], limit=1)
         if duplicate_invoice:
             reason = _("Duplicate slip transaction detected: %(tx)s (already used by %(invoice)s)") % {
@@ -246,22 +246,22 @@ class AccountMove(models.Model):
             self._mark_slip_rejected(reason)
             raise UserError(reason)
 
-        self._slipok_register_payment(journal=journal, amount=amount, transaction_id=transaction_id)
+        self._slip_register_payment(journal=journal, amount=amount, transaction_id=transaction_id)
 
         success_message = _("Slip verified and payment registered successfully.")
         self.write({
-            'slipok_state': 'verified',
-            'slipok_message': success_message,
-            'slipok_verified_amount': amount,
-            'slipok_receiver_account': receiver_account,
-            'slipok_transaction_id': transaction_id,
-            'slipok_verified_at': fields.Datetime.now(),
+            'slip_state': 'verified',
+            'slip_message': success_message,
+            'slip_verified_amount': amount,
+            'slip_receiver_account': receiver_account,
+            'slip_transaction_id': transaction_id,
+            'slip_verified_at': fields.Datetime.now(),
             'line_payment_state': 'verified',
             'is_active_line_bill': False,
         })
         self.message_post(body=success_message)
 
-    def _slipok_get_configuration(self):
+    def _slip_get_configuration(self):
         config = self.env['ir.config_parameter'].sudo()
         provider = self.company_id.slip_verification_provider or 'slipok'
 
@@ -302,7 +302,7 @@ class AccountMove(models.Model):
 
         return provider, branch_id, api_key, slip2go_secret, company_bank, journal
 
-    def _slipok_register_payment(self, journal, amount, transaction_id):
+    def _slip_register_payment(self, journal, amount, transaction_id):
         self.ensure_one()
         register_ctx = {
             'active_model': 'account.move',
@@ -330,9 +330,9 @@ class AccountMove(models.Model):
 
     def _mark_slip_rejected(self, reason):
         self.write({
-            'slipok_state': 'rejected',
-            'slipok_message': reason,
-            'slipok_verified_at': False,
+            'slip_state': 'rejected',
+            'slip_message': reason,
+            'slip_verified_at': False,
             'line_payment_state': 'rejected',
         })
         self.message_post(body=_("Slip rejected: %s") % reason)

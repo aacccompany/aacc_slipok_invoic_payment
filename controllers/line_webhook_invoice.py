@@ -1,12 +1,15 @@
 import base64
 import hashlib
 import hmac
+import imghdr
 import json
 import logging
+import threading
 
 import requests
 
-from odoo import http
+from odoo import api, http, SUPERUSER_ID
+from odoo.modules.registry import Registry
 from odoo.exceptions import UserError
 from odoo.http import request
 
@@ -84,6 +87,15 @@ class LineWebhookInvoice(http.Controller):
             )
             return
 
+        if invoice.line_payment_state == 'verifying':
+            self._notify_line(
+                access_token,
+                user_id,
+                "We are currently verifying your previous slip. Please wait a moment. ⏳",
+                reply_token=reply_token,
+            )
+            return
+
         self._notify_line(
             access_token,
             user_id,
@@ -105,37 +117,65 @@ class LineWebhookInvoice(http.Controller):
             )
             return
 
-        invoice.write({
-            'slipok_image': base64.b64encode(image_binary),
-            'slipok_image_filename': f'slip_{invoice.name}.jpg',
-            'line_payment_state': 'verifying',
-        })
-
-        try:
-            invoice._action_slipok_verify_and_register_payment()
-        except UserError as exc:
-            message = (exc.args and exc.args[0]) or str(exc)
-            invoice.write({'line_payment_state': 'rejected'})
-            self._notify_line(access_token, user_id, f"Unfortunately, we couldn't verify your payment slip. ❌\nReason: {message}\nPlease check and try again.", reply_token=reply_token)
-            return
-        except Exception:
-            _logger.exception("Invoice SlipOK verification failed unexpectedly")
+        image_type = imghdr.what(None, h=image_binary)
+        if image_type not in ['jpeg', 'png']:
             invoice.write({'line_payment_state': 'rejected'})
             self._notify_line(
                 access_token,
                 user_id,
-                "We encountered a system error while verifying your slip. Please kindly contact our administrator for assistance. 🛠️",
+                "The file you uploaded is not a valid JPEG or PNG image. Please send a valid slip image. 📁",
                 reply_token=reply_token,
             )
             return
 
-        invoice.write({'line_payment_state': 'verified', 'is_active_line_bill': False})
-        self._notify_line(
-            access_token,
-            user_id,
-            f"Payment Verified! ✅\nThank you for your payment for invoice {invoice.name}. Your payment is now successfully recorded! 🎉",
-            reply_token=reply_token,
+        invoice.write({
+            'slip_image': base64.b64encode(image_binary),
+            'slip_image_filename': f'slip_{invoice.name}.{image_type}',
+            'line_payment_state': 'verifying',
+        })
+
+        # Run verification in background thread to prevent blocking the web worker
+        db_name = request.env.cr.dbname
+        invoice_id = invoice.id
+        thread = threading.Thread(
+            target=self._process_verification_background,
+            args=(db_name, invoice_id, access_token, user_id)
         )
+        thread.start()
+
+    def _process_verification_background(self, db_name, invoice_id, access_token, user_id):
+        """ Runs in a separate thread """
+        db_registry = Registry(db_name)
+        with db_registry.cursor() as cr:
+            env = api.Environment(cr, SUPERUSER_ID, {})
+            invoice = env['account.move'].browse(invoice_id)
+
+            try:
+                invoice._action_verify_slip_and_register_payment()
+                env.cr.commit()
+            except UserError as exc:
+                message = (exc.args and exc.args[0]) or str(exc)
+                invoice.write({'line_payment_state': 'rejected'})
+                env.cr.commit()
+                self._notify_line(access_token, user_id, f"Unfortunately, we couldn't verify your payment slip. ❌\nReason: {message}\nPlease check and try again.")
+                return
+            except Exception:
+                _logger.exception("Invoice Slip verification failed unexpectedly")
+                invoice.write({'line_payment_state': 'rejected'})
+                env.cr.commit()
+                self._notify_line(
+                    access_token,
+                    user_id,
+                    "We encountered a system error while verifying your slip. Please kindly contact our administrator for assistance. 🛠️",
+                )
+                return
+
+            invoice.write({'line_payment_state': 'verified', 'is_active_line_bill': False})
+            self._notify_line(
+                access_token,
+                user_id,
+                f"Payment Verified! ✅\nThank you for your payment for invoice {invoice.name}. Your payment is now successfully recorded! 🎉",
+            )
 
     def _download_line_image(self, access_token, message_id):
         url = f'https://api-data.line.me/v2/bot/message/{message_id}/content'
