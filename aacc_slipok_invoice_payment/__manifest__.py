@@ -1,10 +1,10 @@
 {
     'name': 'LINE Payment & Slip Auto-Verify Integration',
-    'version': '19.0.1.0.0',
+    'version': '19.0.1.0.1',
     'category': 'Accounting/Accounting',
     'summary': 'Automate invoice payments via LINE with Slip Verification, Dynamic QR Codes, and Auto-Reconciliation',
     'author': 'AACC',
-    'website': 'https://www.yourcompany.com',
+    'website': 'https://aacc-th.com',
     'support': 'https://aacc-th.com/support',
     'license': 'OPL-1',
     'price': 27.07,
